@@ -65,6 +65,7 @@ namespace FileCompressor.Context
             _disposeSyncObject.WaitOne();
             InStream.Close();
             ToStream.Close();
+            _disposeSyncObject.Close();
         }
     }
 }

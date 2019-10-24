@@ -6,3 +6,4 @@
 /.vs/FileCompressor/v15/Server/sqlite3
 /FileCompressor/obj/Debug
 *.user
+*.suo
