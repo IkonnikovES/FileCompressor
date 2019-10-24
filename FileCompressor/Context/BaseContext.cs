@@ -9,7 +9,7 @@ namespace FileCompressor.Context
         where TRead : BaseChunk
         where TWrite : BaseChunk
     {
-        public const int BufferSize = 1024 * 1024;
+        public const int BufferSize = 1024 * 1024 * 32;
 
         private static readonly object _writeSyncObject = new object();
         private static readonly object _readSyncObject = new object();
