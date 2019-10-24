@@ -34,16 +34,7 @@ namespace FileCompressor.Context
 
         protected long LeftBytes => InStream.Length - InStream.Position;
 
-        public bool CanRead
-        {
-            get
-            {
-                lock (_canReadSyncObject)
-                {
-                    return PartitionsCount > 0 && PartitionsCount >= ++_startedIterationCount;
-                }
-            }
-        }
+        public bool CanRead => PartitionsCount > 0 && PartitionsCount >= ++_startedIterationCount;
 
         protected abstract int InitialPartitionsCount();
         protected abstract TRead ReadChunk();

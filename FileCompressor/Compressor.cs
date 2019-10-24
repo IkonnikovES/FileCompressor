@@ -7,11 +7,11 @@ namespace FileCompressor
 {
     public class Compressor
     {
-        private readonly int _degreeOfParallelism;
+        private readonly Semaphore _syncObject;
 
         public Compressor(int degreeOfParallelism)
         {
-            _degreeOfParallelism = degreeOfParallelism;
+            _syncObject = new Semaphore(degreeOfParallelism, degreeOfParallelism);
         }
 
         public void Compress(string inFilePath, string toFilePath)
@@ -34,17 +34,15 @@ namespace FileCompressor
             where TRead : BaseChunk
             where TWrite : BaseChunk
         {
-            var threadsCount = Math.Min(_degreeOfParallelism, context.PartitionsCount);
-            for (var i = 0; i < threadsCount; i++)
+            while (context.CanRead)
             {
+                _syncObject.WaitOne();
                 var thread = new Thread(() =>
                 {
-                    while (context.CanRead)
-                    {
-                        var readChunk = context.Read();
-                        var writeChunk = context.ConvertReadToWriteModel(readChunk);
-                        context.Write(writeChunk);
-                    }
+                    var readChunk = context.Read();
+                    var writeChunk = context.ConvertReadToWriteModel(readChunk);
+                    context.Write(writeChunk);
+                    _syncObject.Release();
                 });
                 thread.Start();
             }
