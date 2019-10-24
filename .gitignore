@@ -7,3 +7,4 @@
 /FileCompressor/obj/Debug
 *.user
 *.suo
+/.vs/FileCompressor/v16/Server/sqlite3

@@ -13,26 +13,37 @@ namespace FileCompressor.Context
 
         private static readonly object _writeSyncObject = new object();
         private static readonly object _readSyncObject = new object();
+        private static readonly object _canReadSyncObject = new object();
 
         private readonly ManualResetEvent _disposeSyncObject = new ManualResetEvent(false);
 
         protected readonly FileStream InStream;
         protected readonly FileStream ToStream;
 
-        private int _threadsCount;
+        public readonly int PartitionsCount;
 
-        private int _finishedThreadsCount = 0;
-        public int _startedThreadsCount = 0;
+        private int _finishedIterationCount = 0;
+        private int _startedIterationCount = 0;
 
         public BaseContext(string inFilePath, string toFilePath)
         {
             InStream = File.OpenRead(inFilePath);
             ToStream = File.Create(toFilePath);
-            _threadsCount = InitialPartitionsCount();
+            PartitionsCount = InitialPartitionsCount();
         }
 
-        public long LeftBytes => InStream.Length - InStream.Position;
-        public bool CanRead => _threadsCount > 0 && _threadsCount >= ++_startedThreadsCount;
+        protected long LeftBytes => InStream.Length - InStream.Position;
+
+        public bool CanRead
+        {
+            get
+            {
+                lock (_canReadSyncObject)
+                {
+                    return PartitionsCount > 0 && PartitionsCount >= ++_startedIterationCount;
+                }
+            }
+        }
 
         protected abstract int InitialPartitionsCount();
         protected abstract TRead ReadChunk();
@@ -41,7 +52,7 @@ namespace FileCompressor.Context
 
         public TRead Read()
         {
-            lock(_readSyncObject)
+            lock (_readSyncObject)
             {
                 var chunk = ReadChunk();
                 return chunk;
@@ -53,7 +64,7 @@ namespace FileCompressor.Context
             lock (_writeSyncObject)
             {
                 WriteChunk(chunk);
-                if (++_finishedThreadsCount == _threadsCount)
+                if (++_finishedIterationCount == PartitionsCount)
                 {
                     _disposeSyncObject.Set();
                 }

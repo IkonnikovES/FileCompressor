@@ -1,23 +1,24 @@
 ﻿using FileCompressor.Context;
 using FileCompressor.Models;
+using System;
 using System.Threading;
 
 namespace FileCompressor
 {
     public class Compressor
     {
-        private readonly Semaphore _syncObject;
+        private readonly int _degreeOfParallelism;
 
         public Compressor(int degreeOfParallelism)
         {
-            _syncObject = new Semaphore(degreeOfParallelism, degreeOfParallelism);
+            _degreeOfParallelism = degreeOfParallelism;
         }
 
         public void Compress(string inFilePath, string toFilePath)
         {
             using (var context = new CompressionContext(inFilePath, toFilePath))
             {
-                ExecuteCompression(context);   
+                ExecuteCompression(context);
             }
         }
 
@@ -29,19 +30,21 @@ namespace FileCompressor
             }
         }
 
-        private void ExecuteCompression<TRead,TWrite>(BaseContext<TRead, TWrite> context)
+        private void ExecuteCompression<TRead, TWrite>(BaseContext<TRead, TWrite> context)
             where TRead : BaseChunk
             where TWrite : BaseChunk
         {
-            while (context.CanRead)
+            var threadsCount = Math.Min(_degreeOfParallelism, context.PartitionsCount);
+            for (var i = 0; i < threadsCount; i++)
             {
-                _syncObject.WaitOne();
                 var thread = new Thread(() =>
                 {
-                    var readChunk = context.Read();
-                    var writeChunk = context.ConvertReadToWriteModel(readChunk);
-                    context.Write(writeChunk);
-                    _syncObject.Release();
+                    while (context.CanRead)
+                    {
+                        var readChunk = context.Read();
+                        var writeChunk = context.ConvertReadToWriteModel(readChunk);
+                        context.Write(writeChunk);
+                    }
                 });
                 thread.Start();
             }
