@@ -43,8 +43,8 @@ namespace FileCompressor.Context
         {
             var buffer = new byte[4];
             InStream.Read(buffer, 0, buffer.Length);
-            var threadsCount = BitConverter.ToInt32(buffer, 0);
-            return threadsCount;
+            var partitionsCount = BitConverter.ToInt32(buffer, 0);
+            return partitionsCount;
         }
     }
 }

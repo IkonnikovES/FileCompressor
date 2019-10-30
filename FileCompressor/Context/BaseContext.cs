@@ -13,7 +13,6 @@ namespace FileCompressor.Context
 
         private static readonly object _writeSyncObject = new object();
         private static readonly object _readSyncObject = new object();
-        private static readonly object _canReadSyncObject = new object();
 
         private readonly ManualResetEvent _disposeSyncObject = new ManualResetEvent(false);
 
@@ -33,7 +32,6 @@ namespace FileCompressor.Context
         }
 
         protected long LeftBytes => InStream.Length - InStream.Position;
-
         public bool CanRead => PartitionsCount > 0 && PartitionsCount >= ++_startedIterationCount;
 
         protected abstract int InitialPartitionsCount();

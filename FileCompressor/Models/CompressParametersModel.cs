@@ -1,6 +1,4 @@
-﻿using System.IO.Compression;
-
-namespace FileCompressor.Models
+﻿namespace FileCompressor.Models
 {
     public class CompressParametersModel
     {

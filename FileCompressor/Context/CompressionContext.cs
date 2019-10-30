@@ -40,10 +40,10 @@ namespace FileCompressor.Context
 
         protected override int InitialPartitionsCount()
         {
-            var threadsCount = (int)Math.Ceiling(InStream.Length / (double)BufferSize);
-            var buffer = BitConverter.GetBytes(threadsCount);
+            var partiotionsCount = (int)Math.Ceiling(InStream.Length / (double)BufferSize);
+            var buffer = BitConverter.GetBytes(partiotionsCount);
             ToStream.Write(buffer, 0, buffer.Length);
-            return threadsCount;
+            return partiotionsCount;
         }
     }
 }
