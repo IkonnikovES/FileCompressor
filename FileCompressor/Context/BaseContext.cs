@@ -11,61 +11,59 @@ namespace FileCompressor.Context
     {
         public const int BufferSize = 1024 * 1024 * 32;
 
-        private static readonly object _writeSyncObject = new object();
         private static readonly object _readSyncObject = new object();
-
-        private readonly ManualResetEvent _disposeSyncObject = new ManualResetEvent(false);
+        private static readonly object _writeSyncObject = new object();
 
         protected readonly FileStream InStream;
         protected readonly FileStream ToStream;
 
-        public readonly int PartitionsCount;
+        private int _partitionsCount;
+        private readonly CancellationToken _cancellationToken;
 
-        private int _finishedIterationCount = 0;
-        private int _startedIterationCount = 0;
-
-        public BaseContext(string inFilePath, string toFilePath)
+        public BaseContext(string inFilePath, string toFilePath, CancellationToken cancellationToken)
         {
+            _cancellationToken = cancellationToken;
+
             InStream = File.OpenRead(inFilePath);
             ToStream = File.Create(toFilePath);
-            PartitionsCount = InitialPartitionsCount();
+            _partitionsCount = InitialPartitionsCount();
         }
 
+        public int PartitionsCount => _partitionsCount;
         protected long LeftBytes => InStream.Length - InStream.Position;
-        public bool CanRead => PartitionsCount > 0 && PartitionsCount >= ++_startedIterationCount;
+        public Exception Exception { get; set; }
 
         protected abstract int InitialPartitionsCount();
-        protected abstract TRead ReadChunk();
-        public abstract void WriteChunk(TWrite chunk);
+        protected abstract TRead Read();
+        protected abstract void Write(TWrite chunk);
+
         public abstract TWrite ConvertReadToWriteModel(TRead readChunk);
 
-        public TRead Read()
+        public bool CheckCanReadAndNotCanceled()
         {
-            lock (_readSyncObject)
+            return Interlocked.Decrement(ref _partitionsCount) > 0 && !_cancellationToken.IsCancellationRequested;
+        }
+
+        public TRead ReadChunk()
+        {
+            lock(_readSyncObject)
             {
-                var chunk = ReadChunk();
-                return chunk;
+                return Read();
             }
         }
 
-        public void Write(TWrite chunk)
+        public void WriteChunk(TWrite chunk)
         {
             lock (_writeSyncObject)
             {
-                WriteChunk(chunk);
-                if (++_finishedIterationCount == PartitionsCount)
-                {
-                    _disposeSyncObject.Set();
-                }
+                Write(chunk);
             }
         }
 
         public void Dispose()
         {
-            _disposeSyncObject.WaitOne();
             InStream.Close();
             ToStream.Close();
-            _disposeSyncObject.Close();
         }
     }
 }

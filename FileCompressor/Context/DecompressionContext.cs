@@ -1,13 +1,15 @@
 ﻿using FileCompressor.Models;
 using System;
 using System.IO;
+using System.Threading;
 
 namespace FileCompressor.Context
 {
     public class DecompressionContext : BaseContext<ChunkForDecompressModel, FileChunk>
     {
-        public DecompressionContext(string inFilePath, string toFilePath) : base(inFilePath, toFilePath)
+        public DecompressionContext(string inFilePath, string toFilePath, CancellationToken cancellationToken) : base(inFilePath, toFilePath, cancellationToken)
         {
+
         }
 
         public override FileChunk ConvertReadToWriteModel(ChunkForDecompressModel readChunk)
@@ -17,13 +19,13 @@ namespace FileCompressor.Context
             return new FileChunk(position, decompressed);
         }
 
-        public override void WriteChunk(FileChunk chunk)
+        protected override void Write(FileChunk chunk)
         {
             ToStream.Seek(chunk.Position, SeekOrigin.Begin);
             ToStream.Write(chunk.DataBuffer, 0, chunk.Length);
         }
 
-        protected override ChunkForDecompressModel ReadChunk()
+        protected override ChunkForDecompressModel Read()
         {
             var positionBuffer = new byte[8];
             var lengthBuffer = new byte[4];

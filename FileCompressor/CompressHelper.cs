@@ -5,6 +5,9 @@ namespace FileCompressor
 {
     public static class CompressHelper
     {
+        public const string CompressMode = "COMPRESS";
+        public const string DecompressMode = "DECOMPRESS";
+
         public static byte[] Compress(byte[] buffer)
         {
             using (var compressedStream = new MemoryStream())

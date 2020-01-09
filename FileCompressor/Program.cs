@@ -1,5 +1,6 @@
 ﻿using FileCompressor.Models;
 using System;
+using System.Threading;
 
 namespace FileCompressor
 {
@@ -7,18 +8,21 @@ namespace FileCompressor
     {
         static void Main(string[] args)
         {
+            var cancellationTokenSource = new CancellationTokenSource();
+            var cancellationToken = cancellationTokenSource.Token;
             try
             {
                 var parameters = ParseParameters(args);
                 var compressMode = parameters.CompressionMode.ToUpper();
-                var compressor = new Compressor(Environment.ProcessorCount);
-                if (compressMode == "COMPRESS")
+                var compressor = new Compressor(Environment.ProcessorCount, cancellationTokenSource.Cancel);
+
+                if (compressMode == CompressHelper.CompressMode)
                 {
-                    compressor.Compress(parameters.FromFilePath, parameters.ToFilePath);
+                    compressor.Compress(parameters.FromFilePath, parameters.ToFilePath, cancellationToken);
                 }
-                else if (compressMode == "DECOMPRESS")
+                else if (compressMode == CompressHelper.DecompressMode)
                 {
-                    compressor.Decompress(parameters.FromFilePath, parameters.ToFilePath);
+                    compressor.Decompress(parameters.FromFilePath, parameters.ToFilePath, cancellationToken);
                 }
                 else
                 {
