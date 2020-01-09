@@ -1,7 +1,6 @@
 ﻿using FileCompressor.Models;
 using System;
 using System.IO;
-using System.Threading;
 
 namespace FileCompressor.Context
 {
