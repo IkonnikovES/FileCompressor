@@ -17,19 +17,15 @@ namespace FileCompressor.Context
         protected readonly FileStream InStream;
         protected readonly FileStream ToStream;
 
-        private int _partitionsCount;
-        private readonly CancellationToken _cancellationToken;
+        public int PartitionsCount;
 
-        public BaseContext(string inFilePath, string toFilePath, CancellationToken cancellationToken)
+        public BaseContext(string inFilePath, string toFilePath)
         {
-            _cancellationToken = cancellationToken;
-
             InStream = File.OpenRead(inFilePath);
             ToStream = File.Create(toFilePath);
-            _partitionsCount = InitialPartitionsCount();
+            PartitionsCount = InitialPartitionsCount();
         }
 
-        public int PartitionsCount => _partitionsCount;
         protected long LeftBytes => InStream.Length - InStream.Position;
         public Exception Exception { get; set; }
 
@@ -38,11 +34,6 @@ namespace FileCompressor.Context
         protected abstract void Write(TWrite chunk);
 
         public abstract TWrite ConvertReadToWriteModel(TRead readChunk);
-
-        public bool CheckCanReadAndNotCanceled()
-        {
-            return Interlocked.Decrement(ref _partitionsCount) > 0 && !_cancellationToken.IsCancellationRequested;
-        }
 
         public TRead ReadChunk()
         {

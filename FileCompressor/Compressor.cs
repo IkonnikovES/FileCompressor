@@ -19,21 +19,21 @@ namespace FileCompressor
 
         public void Compress(string inFilePath, string toFilePath, CancellationToken cancellationToken)
         {
-            using (var context = new CompressionContext(inFilePath, toFilePath, cancellationToken))
+            using (var context = new CompressionContext(inFilePath, toFilePath))
             {
-                ExecuteCompression(context);
+                ExecuteCompression(context, cancellationToken);
             }
         }
 
         public void Decompress(string inFilePath, string toFilePath, CancellationToken cancellationToken)
         {
-            using (var context = new DecompressionContext(inFilePath, toFilePath, cancellationToken))
+            using (var context = new DecompressionContext(inFilePath, toFilePath))
             {
-                ExecuteCompression(context);
+                ExecuteCompression(context, cancellationToken);
             }
         }
 
-        private void ExecuteCompression<TRead, TWrite>(BaseContext<TRead, TWrite> context)
+        private void ExecuteCompression<TRead, TWrite>(BaseContext<TRead, TWrite> context, CancellationToken cancellationToken)
             where TRead : BaseChunk
             where TWrite : BaseChunk
         {
@@ -41,7 +41,7 @@ namespace FileCompressor
             _waitHandles = new WaitHandle[threadsCount];
             for (var i = 0; i < threadsCount; i++)
             {
-                StartCompressionThread(context, i);
+                StartCompressionThread(context, i, cancellationToken);
             }
 
             WaitHandle.WaitAll(_waitHandles);
@@ -51,7 +51,7 @@ namespace FileCompressor
             }
         }
 
-        private void StartCompressionThread<TRead, TWrite>(BaseContext<TRead, TWrite> context, int index)
+        private void StartCompressionThread<TRead, TWrite>(BaseContext<TRead, TWrite> context, int index, CancellationToken cancellationToken)
             where TRead : BaseChunk
             where TWrite : BaseChunk
         {
@@ -67,7 +67,7 @@ namespace FileCompressor
                         var writeChunk = context.ConvertReadToWriteModel(readChunk);
                         context.WriteChunk(writeChunk);
                     }
-                    while (context.CheckCanReadAndNotCanceled());
+                    while (Interlocked.Decrement(ref context.PartitionsCount) > 0 && !cancellationToken.IsCancellationRequested);
                 }
                 catch (Exception ex)
                 {

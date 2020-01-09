@@ -6,9 +6,8 @@ namespace FileCompressor.Context
 {
     public class CompressionContext : BaseContext<FileChunk, ByteChunkModel>
     {
-        public CompressionContext(string inFilePath, string toFilePath, CancellationToken cancellationToken) : base(inFilePath, toFilePath, cancellationToken)
+        public CompressionContext(string inFilePath, string toFilePath) : base(inFilePath, toFilePath)
         {
-
         }
 
         public override ByteChunkModel ConvertReadToWriteModel(FileChunk readChunk)
