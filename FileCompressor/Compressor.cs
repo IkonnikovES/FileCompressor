@@ -61,13 +61,12 @@ namespace FileCompressor
             {
                 try
                 {
-                    do
+                    while (Interlocked.Decrement(ref context.PartitionsCount) >= 0 && !cancellationToken.IsCancellationRequested)
                     {
                         var readChunk = context.ReadChunk();
                         var writeChunk = context.ConvertReadToWriteModel(readChunk);
                         context.WriteChunk(writeChunk);
                     }
-                    while (Interlocked.Decrement(ref context.PartitionsCount) > 0 && !cancellationToken.IsCancellationRequested);
                 }
                 catch (Exception ex)
                 {
