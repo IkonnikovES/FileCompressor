@@ -10,9 +10,6 @@ namespace FileCompressor.Context
     {
         public const int BufferSize = 1024 * 1024 * 32;
 
-        private static readonly object _readSyncObject = new object();
-        private static readonly object _writeSyncObject = new object();
-
         protected readonly FileStream InStream;
         protected readonly FileStream ToStream;
 
@@ -28,26 +25,10 @@ namespace FileCompressor.Context
         protected long LeftBytes => InStream.Length - InStream.Position;
 
         protected abstract int InitialPartitionsCount();
-        protected abstract TRead Read();
-        protected abstract void Write(TWrite chunk);
 
+        public abstract TRead ReadChunk();
         public abstract TWrite ConvertReadToWriteModel(TRead readChunk);
-
-        public TRead ReadChunk()
-        {
-            lock(_readSyncObject)
-            {
-                return Read();
-            }
-        }
-
-        public void WriteChunk(TWrite chunk)
-        {
-            lock (_writeSyncObject)
-            {
-                Write(chunk);
-            }
-        }
+        public abstract void WriteChunk(TWrite chunk);
 
         public void Dispose()
         {

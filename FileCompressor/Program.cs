@@ -18,11 +18,11 @@ namespace FileCompressor
 
                 //if (compressMode == CompressHelper.CompressMode)
                 //{
-                //Compressor.Compress(@"E:\test.log", @"E:\test.gz");
+                    Compressor.Compress(@"R:\test.log", @"R:\test.gz");
                 //}
                 //else if (compressMode == CompressHelper.DecompressMode)
                 //{
-                Compressor.Decompress(@"E:\test.gz", @"E:\test2.txt");
+                //    Compressor.Decompress(@"E:\test.gz", @"E:\test2.txt");
                 //}
                 //else
                 //{

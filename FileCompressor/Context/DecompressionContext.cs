@@ -18,13 +18,13 @@ namespace FileCompressor.Context
             return new FileChunk(position, decompressed);
         }
 
-        protected override void Write(FileChunk chunk)
+        public override void WriteChunk(FileChunk chunk)
         {
             ToStream.Seek(chunk.Position, SeekOrigin.Begin);
             ToStream.Write(chunk.DataBuffer, 0, chunk.Length);
         }
 
-        protected override ChunkForDecompressModel Read()
+        public override ChunkForDecompressModel ReadChunk()
         {
             var positionBuffer = new byte[8];
             var lengthBuffer = new byte[4];

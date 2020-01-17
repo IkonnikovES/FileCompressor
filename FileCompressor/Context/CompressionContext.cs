@@ -1,6 +1,5 @@
 ﻿using FileCompressor.Models;
 using System;
-using System.Threading;
 
 namespace FileCompressor.Context
 {
@@ -19,7 +18,7 @@ namespace FileCompressor.Context
             return new ByteChunkModel(length, position, compressed);
         }
 
-        protected override void Write(ByteChunkModel chunk)
+        public override void WriteChunk(ByteChunkModel chunk)
         {
             var positionBuffer = chunk.PositionBuffer;
             var lengthBuffer = chunk.LengthBuffer;
@@ -30,12 +29,11 @@ namespace FileCompressor.Context
             ToStream.Write(dataBuffer, 0, dataBuffer.Length);
         }
 
-        protected override FileChunk Read()
+        public override FileChunk ReadChunk()
         {
             var buffer = new byte[Math.Min(BufferSize, LeftBytes)];
             var position = InStream.Position;
             InStream.Read(buffer, 0, buffer.Length);
-
             return new FileChunk(position, buffer);
         }
 

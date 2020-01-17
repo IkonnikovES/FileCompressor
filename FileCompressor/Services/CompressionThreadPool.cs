@@ -23,7 +23,7 @@ namespace FileCompressor.Services
 
         public void StartThread(Action<CancellationToken> action)
         {
-            var handle = new EventWaitHandle(false, EventResetMode.ManualReset);
+            var handle = new ManualResetEvent(false);
             _waitHandles[_position++] = handle;
             var thread = new Thread(() =>
             {
@@ -51,11 +51,6 @@ namespace FileCompressor.Services
             {
                 throw _exception;
             }
-        }
-
-        public bool CanAdd()
-        {
-            return _position < _waitHandles.Length; 
         }
     }
 }

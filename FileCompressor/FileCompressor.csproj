@@ -50,6 +50,7 @@
     <Compile Include="Models\CompressParametersModel.cs" />
     <Compile Include="Models\Chunk\FileChunk.cs" />
     <Compile Include="Context\CompressionContext.cs" />
+    <Compile Include="Services\CompressionQueue.cs" />
     <Compile Include="Services\Compressor.cs" />
     <Compile Include="Context\DecompressionContext.cs" />
     <Compile Include="Models\Chunk\ByteChunkModel.cs" />
