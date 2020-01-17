@@ -16,7 +16,7 @@ namespace FileCompressor.Context
         protected readonly FileStream InStream;
         protected readonly FileStream ToStream;
 
-        public int PartitionsCount;
+        public readonly int PartitionsCount;
 
         public BaseContext(string inFilePath, string toFilePath)
         {
@@ -26,7 +26,6 @@ namespace FileCompressor.Context
         }
 
         protected long LeftBytes => InStream.Length - InStream.Position;
-        public Exception Exception { get; set; }
 
         protected abstract int InitialPartitionsCount();
         protected abstract TRead Read();

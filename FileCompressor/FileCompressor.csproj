@@ -43,18 +43,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CompressHelper.cs" />
+    <Compile Include="Helpers\CompressHelper.cs" />
     <Compile Include="Context\BaseContext.cs" />
     <Compile Include="Models\Chunk\BaseChunk.cs" />
     <Compile Include="Models\Chunk\ChunkForDecompressModel.cs" />
     <Compile Include="Models\CompressParametersModel.cs" />
     <Compile Include="Models\Chunk\FileChunk.cs" />
     <Compile Include="Context\CompressionContext.cs" />
-    <Compile Include="Compressor.cs" />
+    <Compile Include="Services\Compressor.cs" />
     <Compile Include="Context\DecompressionContext.cs" />
     <Compile Include="Models\Chunk\ByteChunkModel.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\CompressionThreadPool.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

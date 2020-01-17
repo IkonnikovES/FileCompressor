@@ -1,5 +1,6 @@
 ﻿using FileCompressor.Models;
 using System;
+using System.Diagnostics;
 using System.Threading;
 
 namespace FileCompressor
@@ -8,26 +9,25 @@ namespace FileCompressor
     {
         static void Main(string[] args)
         {
-            var cancellationTokenSource = new CancellationTokenSource();
-            var cancellationToken = cancellationTokenSource.Token;
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
             try
             {
-                var parameters = ParseParameters(args);
-                var compressMode = parameters.CompressionMode.ToUpper();
-                var compressor = new Compressor(Environment.ProcessorCount, cancellationTokenSource.Cancel);
+                //var parameters = ParseParameters(args);
+                //var compressMode = parameters.CompressionMode.ToUpper();
 
-                if (compressMode == CompressHelper.CompressMode)
-                {
-                    compressor.Compress(parameters.FromFilePath, parameters.ToFilePath, cancellationToken);
-                }
-                else if (compressMode == CompressHelper.DecompressMode)
-                {
-                    compressor.Decompress(parameters.FromFilePath, parameters.ToFilePath, cancellationToken);
-                }
-                else
-                {
-                    throw new ArgumentException("Команда не распознана введите compress/decompress");
-                }
+                //if (compressMode == CompressHelper.CompressMode)
+                //{
+                //Compressor.Compress(@"E:\test.log", @"E:\test.gz");
+                //}
+                //else if (compressMode == CompressHelper.DecompressMode)
+                //{
+                Compressor.Decompress(@"E:\test.gz", @"E:\test2.txt");
+                //}
+                //else
+                //{
+                //    throw new ArgumentException("Команда не распознана введите compress/decompress");
+                //}
 
                 Console.WriteLine("Процесс завершен с кодом 0");
             }
@@ -36,6 +36,9 @@ namespace FileCompressor
                 Console.WriteLine("Процесс завершен с кодом 1");
                 Console.WriteLine($"Текст ошибки: {ex.Message}");
             }
+            stopWatch.Stop();
+            Console.WriteLine(stopWatch.Elapsed);
+            Console.ReadLine();
         }
 
         static CompressParametersModel ParseParameters(string[] args)
