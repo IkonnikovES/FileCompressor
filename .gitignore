@@ -2,9 +2,8 @@
 # Данный GITIGNORE-файл был автоматически создан Microsoft(R) Visual Studio.
 ################################################################################
 
-/FileCompressor/bin/Debug
-/.vs/FileCompressor/v15/Server/sqlite3
-/FileCompressor/obj/Debug
+/FileCompressor/bin
+/.vs
+/FileCompressor/obj
 *.user
 *.suo
-/.vs/FileCompressor/v16/Server/sqlite3
