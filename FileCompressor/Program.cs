@@ -1,7 +1,6 @@
 ﻿using FileCompressor.Models;
 using System;
 using System.Diagnostics;
-using System.Threading;
 
 namespace FileCompressor
 {
@@ -9,26 +8,22 @@ namespace FileCompressor
     {
         static void Main(string[] args)
         {
-            var stopWatch = new Stopwatch();
-            stopWatch.Start();
             try
             {
-                //var parameters = ParseParameters(args);
-                //var compressMode = parameters.CompressionMode.ToUpper();
-
-                //if (compressMode == CompressHelper.CompressMode)
-                //{
-                    Compressor.Compress(@"R:\test.log", @"R:\test.gz");
-                //}
-                //else if (compressMode == CompressHelper.DecompressMode)
-                //{
-                //    Compressor.Decompress(@"E:\test.gz", @"E:\test2.txt");
-                //}
-                //else
-                //{
-                //    throw new ArgumentException("Команда не распознана введите compress/decompress");
-                //}
-
+                var parameters = ParseParameters(args);
+                var compressMode = parameters.CompressionMode.ToUpper();
+                if (compressMode == CompressHelper.CompressMode)
+                {
+                    Compressor.Compress(parameters.FromFilePath, parameters.ToFilePath);
+                }
+                else if (compressMode == CompressHelper.DecompressMode)
+                {
+                    Compressor.Decompress(parameters.FromFilePath, parameters.ToFilePath);
+                }
+                else
+                {
+                    throw new ArgumentException("Команда не распознана введите compress/decompress");
+                }
                 Console.WriteLine("Процесс завершен с кодом 0");
             }
             catch (Exception ex)
@@ -36,8 +31,6 @@ namespace FileCompressor
                 Console.WriteLine("Процесс завершен с кодом 1");
                 Console.WriteLine($"Текст ошибки: {ex.Message}");
             }
-            stopWatch.Stop();
-            Console.WriteLine(stopWatch.Elapsed);
             Console.ReadLine();
         }
 

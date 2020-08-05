@@ -1,7 +1,6 @@
 ﻿using FileCompressor.Models;
 using System;
 using System.IO;
-using System.Threading;
 
 namespace FileCompressor.Context
 {
@@ -20,29 +19,35 @@ namespace FileCompressor.Context
 
         public override void WriteChunk(FileChunk chunk)
         {
-            ToStream.Seek(chunk.Position, SeekOrigin.Begin);
-            ToStream.Write(chunk.DataBuffer, 0, chunk.Length);
+            lock (ToStream)
+            {
+                ToStream.Seek(chunk.Position, SeekOrigin.Begin);
+                ToStream.Write(chunk.DataBuffer, 0, chunk.Length);
+            }
         }
 
         public override ChunkForDecompressModel ReadChunk()
         {
-            var positionBuffer = new byte[8];
-            var lengthBuffer = new byte[4];
+            lock (InStream)
+            {
+                var positionBuffer = new byte[Int64Size];
+                var lengthBuffer = new byte[Int32Size];
 
-            InStream.Read(positionBuffer, 0, 8);
-            InStream.Read(lengthBuffer, 0, 4);
+                InStream.Read(positionBuffer, 0, positionBuffer.Length);
+                InStream.Read(lengthBuffer, 0, lengthBuffer.Length);
 
-            var length = BitConverter.ToInt32(lengthBuffer, 0);
+                var length = BitConverter.ToInt32(lengthBuffer, 0);
 
-            var buffer = new byte[length];
-            InStream.Read(buffer, 0, length);
+                var buffer = new byte[length];
+                InStream.Read(buffer, 0, buffer.Length);
 
-            return new ChunkForDecompressModel(positionBuffer, buffer);
+                return new ChunkForDecompressModel(positionBuffer, buffer);
+            }
         }
 
         protected override int InitialPartitionsCount()
         {
-            var buffer = new byte[4];
+            var buffer = new byte[Int32Size];
             InStream.Read(buffer, 0, buffer.Length);
             var partitionsCount = BitConverter.ToInt32(buffer, 0);
             return partitionsCount;

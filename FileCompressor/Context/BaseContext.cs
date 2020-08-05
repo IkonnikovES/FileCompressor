@@ -10,6 +10,9 @@ namespace FileCompressor.Context
     {
         public const int BufferSize = 1024 * 1024 * 32;
 
+        protected const int Int32Size = 4;
+        protected const int Int64Size = 8;
+
         protected readonly FileStream InStream;
         protected readonly FileStream ToStream;
 

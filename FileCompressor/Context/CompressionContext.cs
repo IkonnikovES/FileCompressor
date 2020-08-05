@@ -20,13 +20,16 @@ namespace FileCompressor.Context
 
         public override void WriteChunk(ByteChunkModel chunk)
         {
-            var positionBuffer = chunk.PositionBuffer;
-            var lengthBuffer = chunk.LengthBuffer;
-            var dataBuffer = chunk.DataBuffer;
+            lock (ToStream)
+            {
+                var positionBuffer = chunk.PositionBuffer;
+                var lengthBuffer = chunk.LengthBuffer;
+                var dataBuffer = chunk.DataBuffer;
 
-            ToStream.Write(positionBuffer, 0, positionBuffer.Length);
-            ToStream.Write(lengthBuffer, 0, lengthBuffer.Length);
-            ToStream.Write(dataBuffer, 0, dataBuffer.Length);
+                ToStream.Write(positionBuffer, 0, positionBuffer.Length);
+                ToStream.Write(lengthBuffer, 0, lengthBuffer.Length);
+                ToStream.Write(dataBuffer, 0, dataBuffer.Length);
+            }
         }
 
         public override FileChunk ReadChunk()

@@ -2,6 +2,8 @@
 using FileCompressor.Models;
 using FileCompressor.Services;
 using System;
+using System.Collections.Concurrent;
+using System.Threading;
 
 namespace FileCompressor
 {
@@ -27,42 +29,27 @@ namespace FileCompressor
             where TRead : BaseChunk
             where TWrite : BaseChunk
         {
-            var compressionPool = new CompressionThreadPool(3);
             var partCount = context.PartitionsCount;
+            var compressionPool = new CompressionPool();
+            var queue = new ConcurrentQueue<TRead>();
 
-            var queueToCompress = new CompressionQueue<TRead>(Environment.ProcessorCount);
-            var queueToWrite = new CompressionQueue<TWrite>(Environment.ProcessorCount);
-
-            compressionPool.StartThread(cancellationToken =>
+            compressionPool.Start(ct =>
             {
-                var readedCount = 0;
-                while (!cancellationToken.IsCancellationRequested && readedCount++ <= partCount)
+                while (Interlocked.Decrement(ref partCount) >= 0)
                 {
-                    queueToCompress.Add(context.ReadChunk());
+                    ct.ThrowIfCancellationRequested();
+                    if (queue.TryDequeue(out var readChunk))
+                    {
+                        var compressedChunk = context.ConvertReadToWriteModel(readChunk);
+                        context.WriteChunk(compressedChunk);
+                    }
+                    else
+                    {
+                        queue.Enqueue(context.ReadChunk());
+                    }
                 }
             });
-
-            compressionPool.StartThread(cancellationToken =>
-            {
-                var compressedCount = 0;
-                while (!cancellationToken.IsCancellationRequested && compressedCount++ <= partCount)
-                {
-                    var chunk = queueToCompress.Take();
-                    queueToWrite.Add(context.ConvertReadToWriteModel(chunk));
-                }
-            });
-
-            compressionPool.StartThread(cancellationToken =>
-            {
-                var writedCount = 0;
-                while (!cancellationToken.IsCancellationRequested && writedCount++ <= partCount)
-                {
-                    var chunk = queueToWrite.Take();
-                    context.WriteChunk(chunk);
-                }
-            });
-
-            compressionPool.WaitAllAndThowExceptionIfExists();
+            compressionPool.WaitAll();
         }
     }
 }
