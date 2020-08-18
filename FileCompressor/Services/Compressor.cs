@@ -1,9 +1,6 @@
 ﻿using FileCompressor.Context;
 using FileCompressor.Models;
 using FileCompressor.Services;
-using System;
-using System.Collections.Concurrent;
-using System.Threading;
 
 namespace FileCompressor
 {
@@ -29,27 +26,30 @@ namespace FileCompressor
             where TRead : BaseChunk
             where TWrite : BaseChunk
         {
-            var partCount = context.PartitionsCount;
-            var compressionPool = new CompressionPool();
-            var queue = new ConcurrentQueue<TRead>();
+            var threadPool = new CompressionThreadPool();
+            var queue = new CompressionQueue<TRead>(threadPool.ThreadsCount, context.PartitionsCount);
 
-            compressionPool.Start(ct =>
+            threadPool.Start(ct =>
             {
-                while (Interlocked.Decrement(ref partCount) >= 0)
+                while (queue.TryDequeue(out var readChunk) || queue.HasFreeSpace())
                 {
                     ct.ThrowIfCancellationRequested();
-                    if (queue.TryDequeue(out var readChunk))
+                    if (readChunk != null)
                     {
                         var compressedChunk = context.ConvertReadToWriteModel(readChunk);
                         context.WriteChunk(compressedChunk);
                     }
+                    else if (context.TryReadChunk(out var chunk))
+                    {
+                        queue.Enqueue(chunk);
+                    }
                     else
                     {
-                        queue.Enqueue(context.ReadChunk());
+                        break;
                     }
                 }
             });
-            compressionPool.WaitAll();
+            threadPool.WaitAll();
         }
     }
 }

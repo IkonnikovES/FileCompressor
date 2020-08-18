@@ -3,22 +3,26 @@ using System.Threading;
 
 namespace FileCompressor.Services
 {
-    public class CompressionPool
+    public class CompressionThreadPool
     {
         private readonly CancellationTokenSource _cancellationTokenSrc = new CancellationTokenSource();
 
         private Exception _exception;
         private readonly WaitHandle[] _waitHandles;
 
-        public CompressionPool()
+        public CompressionThreadPool()
         {
-            _waitHandles = new WaitHandle[Environment.ProcessorCount];
+            ThreadsCount = Environment.ProcessorCount;
+            _waitHandles = new WaitHandle[ThreadsCount];
         }
 
-        public CompressionPool(int threadsCount)
+        public CompressionThreadPool(int threadsCount)
         {
-            _waitHandles = new WaitHandle[threadsCount];
+            ThreadsCount = threadsCount;
+            _waitHandles = new WaitHandle[ThreadsCount];
         }
+
+        public int ThreadsCount { get; set; }
 
         public void Start(Action<CancellationToken> action)
         {

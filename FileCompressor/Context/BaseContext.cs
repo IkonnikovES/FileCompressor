@@ -29,7 +29,21 @@ namespace FileCompressor.Context
 
         protected abstract int InitialPartitionsCount();
 
-        public abstract TRead ReadChunk();
+        public bool TryReadChunk(out TRead chunk)
+        {
+            lock (InStream)
+            {
+                if (LeftBytes > 0)
+                {
+                    chunk = ReadChunk();
+                    return true;
+                }
+                chunk = default;
+                return false;
+            }
+        }
+
+        protected abstract TRead ReadChunk();
         public abstract TWrite ConvertReadToWriteModel(TRead readChunk);
         public abstract void WriteChunk(TWrite chunk);
 

@@ -14,7 +14,6 @@ namespace FileCompressor.Context
             var position = BitConverter.GetBytes(readChunk.Position);
             var compressed = CompressHelper.Compress(readChunk.DataBuffer);
             var length = BitConverter.GetBytes(compressed.Length);
-
             return new ByteChunkModel(length, position, compressed);
         }
 
@@ -32,7 +31,7 @@ namespace FileCompressor.Context
             }
         }
 
-        public override FileChunk ReadChunk()
+        protected override FileChunk ReadChunk()
         {
             var buffer = new byte[Math.Min(BufferSize, LeftBytes)];
             var position = InStream.Position;

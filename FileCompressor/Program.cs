@@ -8,6 +8,8 @@ namespace FileCompressor
     {
         static void Main(string[] args)
         {
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
             try
             {
                 var parameters = ParseParameters(args);
@@ -31,7 +33,8 @@ namespace FileCompressor
                 Console.WriteLine("Процесс завершен с кодом 1");
                 Console.WriteLine($"Текст ошибки: {ex.Message}");
             }
-            Console.ReadLine();
+            stopwatch.Stop();
+            Console.WriteLine(stopwatch.Elapsed);
         }
 
         static CompressParametersModel ParseParameters(string[] args)

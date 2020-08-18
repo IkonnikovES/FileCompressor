@@ -26,23 +26,20 @@ namespace FileCompressor.Context
             }
         }
 
-        public override ChunkForDecompressModel ReadChunk()
+        protected override ChunkForDecompressModel ReadChunk()
         {
-            lock (InStream)
-            {
-                var positionBuffer = new byte[Int64Size];
-                var lengthBuffer = new byte[Int32Size];
+            var positionBuffer = new byte[Int64Size];
+            var lengthBuffer = new byte[Int32Size];
 
-                InStream.Read(positionBuffer, 0, positionBuffer.Length);
-                InStream.Read(lengthBuffer, 0, lengthBuffer.Length);
+            InStream.Read(positionBuffer, 0, positionBuffer.Length);
+            InStream.Read(lengthBuffer, 0, lengthBuffer.Length);
 
-                var length = BitConverter.ToInt32(lengthBuffer, 0);
+            var length = BitConverter.ToInt32(lengthBuffer, 0);
 
-                var buffer = new byte[length];
-                InStream.Read(buffer, 0, buffer.Length);
+            var buffer = new byte[length];
+            InStream.Read(buffer, 0, buffer.Length);
 
-                return new ChunkForDecompressModel(positionBuffer, buffer);
-            }
+            return new ChunkForDecompressModel(positionBuffer, buffer);
         }
 
         protected override int InitialPartitionsCount()
