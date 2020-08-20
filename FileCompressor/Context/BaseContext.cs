@@ -16,18 +16,18 @@ namespace FileCompressor.Context
         protected readonly FileStream InStream;
         protected readonly FileStream ToStream;
 
-        public readonly int PartitionsCount;
+        public readonly int ChunksCount;
 
         public BaseContext(string inFilePath, string toFilePath)
         {
             InStream = File.OpenRead(inFilePath);
             ToStream = File.Create(toFilePath);
-            PartitionsCount = InitialPartitionsCount();
+            ChunksCount = GetChunksCount();
         }
 
         protected long LeftBytes => InStream.Length - InStream.Position;
 
-        protected abstract int InitialPartitionsCount();
+        protected abstract int GetChunksCount();
 
         public bool TryReadChunk(out TRead chunk)
         {

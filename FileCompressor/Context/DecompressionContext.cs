@@ -42,7 +42,7 @@ namespace FileCompressor.Context
             return new ChunkForDecompressModel(positionBuffer, buffer);
         }
 
-        protected override int InitialPartitionsCount()
+        protected override int GetChunksCount()
         {
             var buffer = new byte[Int32Size];
             InStream.Read(buffer, 0, buffer.Length);

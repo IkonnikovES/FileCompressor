@@ -27,14 +27,14 @@ namespace FileCompressor
             where TWrite : BaseChunk
         {
             var threadPool = new CompressionThreadPool();
-            var queue = new CompressionQueue<TRead>(threadPool.ThreadsCount, context.PartitionsCount);
+            var queue = new CompressionQueue<TRead>(threadPool.ThreadsCount, context.ChunksCount);
 
             threadPool.Start(ct =>
             {
-                while (queue.TryDequeue(out var readChunk) || queue.HasFreeSpace())
+                while (true)
                 {
                     ct.ThrowIfCancellationRequested();
-                    if (readChunk != null)
+                    if (queue.TryDequeue(out var readChunk))
                     {
                         var compressedChunk = context.ConvertReadToWriteModel(readChunk);
                         context.WriteChunk(compressedChunk);

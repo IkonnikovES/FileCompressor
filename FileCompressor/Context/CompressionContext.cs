@@ -39,7 +39,7 @@ namespace FileCompressor.Context
             return new FileChunk(position, buffer);
         }
 
-        protected override int InitialPartitionsCount()
+        protected override int GetChunksCount()
         {
             var partiotionsCount = (int)Math.Ceiling(InStream.Length / (double)BufferSize);
             var buffer = BitConverter.GetBytes(partiotionsCount);
